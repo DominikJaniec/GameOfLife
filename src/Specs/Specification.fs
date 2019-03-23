@@ -30,25 +30,49 @@ module Specification =
                         ]
 
             ; testCase "Cell without neighbours dies" <| fun _ ->
-                Universe.evolve [ "-x-" ]
+                Universe.evolve [ "-X-" ]
                     |> Expect.equal "dead universe" [ "---" ]
 
             ; testCase "Cells with single neighbour both die" <| fun _ ->
-                Universe.evolve [ "-xx-" ]
-                    |> Expect.equal "dead universe" [ "----" ]
+                Universe.evolve [ "-XX-" ]
+                    |> Expect.equal "underpopulated" [ "----" ]
 
             ; testCase "Cell with two neighbours stay alive" <| fun _ ->
-                Universe.evolve [ "-xxx-" ]
-                    |> Expect.equal "last survivor" [ "--x--" ]
+                Universe.evolve [ "-XXX-" ]
+                    |> Expect.equal "last survivor" [ "--X--" ]
 
             ; testCase "Cell with three neighbours stay alive" <| fun _ ->
-                [ "--x--"
-                ; "-xxx-"
+                [ "--X--"
+                ; "-XXX-"
+                ; "-----"
                 ]
                     |> Universe.evolve
                     |> Expect.equal "two are also good" <|
+                        [ "-xXx-"
+                        ; "-XXX-"
+                        ; "--x--"
+                        ]
+
+            ; testCase "Cell with more then three neighbours dies" <| fun _ ->
+                [ "-X---"
+                ; "-XXX-"
+                ; "---X-"
+                ]
+                    |> Universe.evolve
+                    |> Expect.equal "overpopulated" <|
+                        [ "-X---"
+                        ; "-X-X-"
+                        ; "---X-"
+                        ]
+
+            ; testCase "Exactly three cells spawn new life" <| fun _ ->
+                [ "---X-"
+                ; "-X-X-"
+                ]
+                    |> Universe.evolve
+                    |> Expect.equal "reproducted" <|
                         [ "--x--"
-                        ; "-xxx-"
+                        ; "--x--"
                         ]
             ]
 
@@ -58,41 +82,41 @@ module Specification =
         let cases =
             [ ( "Block"
               , [ "----"
-                ; "-xx-"
-                ; "-xx-"
+                ; "-XX-"
+                ; "-XX-"
                 ; "----"
                 ]
               )
             ; ( "Bee-hive"
               , [ "------"
-                ; "--xx--"
-                ; "-x--x-"
-                ; "--xx--"
+                ; "--XX--"
+                ; "-X--X-"
+                ; "--XX--"
                 ; "------"
                 ]
               )
             ; ( "Loaf"
               , [ "------"
-                ; "--xx--"
-                ; "-x--x-"
-                ; "--x-x-"
-                ; "---x--"
+                ; "--XX--"
+                ; "-X--X-"
+                ; "--X-X-"
+                ; "---X--"
                 ; "------"
                 ]
               )
             ; ( "Boat"
               , [ "-----"
-                ; "-xx--"
-                ; "-x-x-"
-                ; "--x--"
+                ; "-XX--"
+                ; "-X-X-"
+                ; "--X--"
                 ; "-----"
                 ]
               )
             ; ( "Tub"
               , [ "-----"
-                ; "--x--"
-                ; "-x-x-"
-                ; "--x--"
+                ; "--X--"
+                ; "-X-X-"
+                ; "--X--"
                 ; "-----"
                 ]
               )

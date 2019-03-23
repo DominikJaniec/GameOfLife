@@ -2,16 +2,36 @@
 open System
 
 module Universe =
+
+    [<Literal>]
+    let Alive = 'X'
+
+    [<Literal>]
+    let Infant = 'x'
+
+    [<Literal>]
+    let Dead = '-'
+
+    let private dead =
+        String [| Dead |]
+
     let evolve (state : string list) : string list =
         let fateOf it neighbours =
-            let aliveCount =
+            let rise = function
+                | Infant -> Alive
+                | cell -> cell
+
+            let alive =
                 neighbours
-                    |> Seq.where (fun a -> a = 'x')
+                    |> Seq.where (fun a -> a <> Dead)
                     |> Seq.length
 
-            match aliveCount with
-            | 2 | 3 -> it
-            | _ -> '-'
+            match (alive, it) with
+            | (2, Infant) -> Alive
+            | (2, Alive) -> Alive
+            | (3, Dead) -> Infant
+            | (3, Alive) -> Alive
+            | _ -> Dead
 
 
         let patchitude = function
@@ -23,7 +43,7 @@ module Universe =
 
 
         let flatitude (window : string []) =
-            let border line = Seq.concat [ "-"; line; "-" ]
+            let border line = Seq.concat [ dead; line; dead ]
             let patched = border >> Seq.windowed 3
 
             let above = window.[0] |> patched
@@ -39,7 +59,7 @@ module Universe =
         let bordered = function
             | None -> [ "" ]
             | Some (row : string) ->
-                String.replicate (row.Length) "-"
+                String.replicate (row.Length) dead
                     |> List.singleton
 
         let top = List.tryHead state |> bordered
