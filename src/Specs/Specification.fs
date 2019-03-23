@@ -7,7 +7,7 @@ open GameOfLife
 module Specification =
 
     [<Tests>]
-    let tests =
+    let specification =
         testList "Game of Life: Specification"
             [ testCase "Empty universe does not change" <| fun _ ->
                 Universe.evolve []
@@ -40,6 +40,7 @@ module Specification =
             ; testCase "Cell with two neighbours stay alive" <| fun _ ->
                 Universe.evolve [ "-xxx-" ]
                     |> Expect.equal "last survivor" [ "--x--" ]
+
             ; testCase "Cell with three neighbours stay alive" <| fun _ ->
                 [ "--x--"
                 ; "-xxx-"
@@ -50,3 +51,57 @@ module Specification =
                         ; "-xxx-"
                         ]
             ]
+
+
+    [<Tests>]
+    let knownStillLifes =
+        let cases =
+            [ ( "Block"
+              , [ "----"
+                ; "-xx-"
+                ; "-xx-"
+                ; "----"
+                ]
+              )
+            ; ( "Bee-hive"
+              , [ "------"
+                ; "--xx--"
+                ; "-x--x-"
+                ; "--xx--"
+                ; "------"
+                ]
+              )
+            ; ( "Loaf"
+              , [ "------"
+                ; "--xx--"
+                ; "-x--x-"
+                ; "--x-x-"
+                ; "---x--"
+                ; "------"
+                ]
+              )
+            ; ( "Boat"
+              , [ "-----"
+                ; "-xx--"
+                ; "-x-x-"
+                ; "--x--"
+                ; "-----"
+                ]
+              )
+            ; ( "Tub"
+              , [ "-----"
+                ; "--x--"
+                ; "-x-x-"
+                ; "--x--"
+                ; "-----"
+                ]
+              )
+            ]
+
+        let example (name, shape) =
+            testCase (sprintf "The '%s' does not change" name) <| fun _ ->
+                Universe.evolve shape
+                    |> Expect.equal "to not changed" shape
+
+        testList "Game of Life's Known: Still Lifes" <|
+            List.map example cases
