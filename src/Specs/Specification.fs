@@ -36,4 +36,17 @@ module Specification =
             ; testCase "Cells with single neighbour both die" <| fun _ ->
                 Universe.evolve [ "-xx-" ]
                     |> Expect.equal "dead universe" [ "----" ]
+
+            ; testCase "Cell with two neighbours stay alive" <| fun _ ->
+                Universe.evolve [ "-xxx-" ]
+                    |> Expect.equal "last survivor" [ "--x--" ]
+            ; testCase "Cell with three neighbours stay alive" <| fun _ ->
+                [ "--x--"
+                ; "-xxx-"
+                ]
+                    |> Universe.evolve
+                    |> Expect.equal "two are also good" <|
+                        [ "--x--"
+                        ; "-xxx-"
+                        ]
             ]
