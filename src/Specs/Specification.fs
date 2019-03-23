@@ -9,9 +9,31 @@ module Specification =
     [<Tests>]
     let tests =
         testList "Game of Life: Specification"
-            [ testCase "universe exists (╭ರᴥ•́)" <| fun _ ->
-                true |> Expect.isTrue "I compute, therefore I am."
-            ; testCase "library is available" <| fun _ ->
-                Say.hello "Test"
-                    |> Expect.stringContains "" "Test"
+            [ testCase "Empty universe does not change" <| fun _ ->
+                Universe.evolve []
+                    |> Expect.isEmpty "Unexpected change"
+
+            ; testCase "Dead universe does not spawn a life" <| fun _ ->
+                Universe.evolve [ "-" ]
+                    |> Expect.equal "dead universe" [ "-" ]
+
+            ; testCase "Huge and dead universe stay daead" <| fun _ ->
+                [ "------"
+                ; "------"
+                ; "------"
+                ]
+                    |> Universe.evolve
+                    |> Expect.equal "huge & dead universe" <|
+                        [ "------"
+                        ; "------"
+                        ; "------"
+                        ]
+
+            ; testCase "Cell without neighbours dies" <| fun _ ->
+                Universe.evolve [ "-x-" ]
+                    |> Expect.equal "dead universe" [ "---" ]
+
+            ; testCase "Cells with single neighbour both die" <| fun _ ->
+                Universe.evolve [ "-xx-" ]
+                    |> Expect.equal "dead universe" [ "----" ]
             ]
