@@ -77,6 +77,7 @@ module Specification =
             ]
 
 
+
     [<Tests>]
     let knownStillLifes =
         let cases =
@@ -122,10 +123,140 @@ module Specification =
               )
             ]
 
-        let example (name, shape) =
-            testCase (sprintf "The '%s' does not change" name) <| fun _ ->
+        let toTestCase (name, shape) =
+            let testName = sprintf "The '%s' does not change" name
+            testCase testName <| fun _ ->
                 Universe.evolve shape
                     |> Expect.equal "to not changed" shape
 
-        testList "Game of Life's Known: Still Lifes" <|
-            List.map example cases
+        List.map toTestCase cases
+            |> testList "Game of Life's Known: Still Lifes"
+
+
+
+    [<Tests>]
+    let knownOscillators =
+        let cases =
+            [ ( "Blinker"
+              , [ [ "-----"
+                  ; "-----"
+                  ; "-xXx-"
+                  ; "-----"
+                  ; "-----"
+                  ]
+                ; [ "-----"
+                  ; "--x--"
+                  ; "--X--"
+                  ; "--x--"
+                  ; "-----"
+                  ]
+                ]
+              )
+            ; ( "Toad"
+              , [ [ "------"
+                  ; "------"
+                  ; "--xxX-"
+                  ; "-Xxx--"
+                  ; "------"
+                  ; "------"
+                  ]
+                ; [ "------"
+                  ; "---x--"
+                  ; "-x--X-"
+                  ; "-X--x-"
+                  ; "--x---"
+                  ; "------"
+                  ]
+                ]
+              )
+            ; ( "Beacon"
+              , [ [ "------"
+                  ; "-XX---"
+                  ; "-X----"
+                  ; "----X-"
+                  ; "---XX-"
+                  ; "------"
+                  ]
+                ; [ "------"
+                  ; "-XX---"
+                  ; "-Xx---"
+                  ; "---xX-"
+                  ; "---XX-"
+                  ; "------"
+                  ]
+                ]
+              )
+            ; ( "Pulsar"
+              , [ [ "-----------------"
+                  ; "----XXx---xXX----"
+                  ; "-----------------"
+                  ; "--X----X-X----X--"
+                  ; "--X----X-X----X--"
+                  ; "--x----X-X----x--"
+                  ; "----XXX---XXX----"
+                  ; "-----------------"
+                  ; "----XXX---XXX----"
+                  ; "--x----X-X----x--"
+                  ; "--X----X-X----X--"
+                  ; "--X----X-X----X--"
+                  ; "-----------------"
+                  ; "----XXx---xXX----"
+                  ; "-----------------"
+                  ]
+                ; [ "-----x-----x-----"
+                  ; "-----X-----X-----"
+                  ; "-----xx---xx-----"
+                  ; "-----------------"
+                  ; "-xXx--xX-Xx--xXx-"
+                  ; "---x-x-X-X-x-x---"
+                  ; "-----XX---XX-----"
+                  ; "-----------------"
+                  ; "-----XX---XX-----"
+                  ; "---x-x-X-X-x-x---"
+                  ; "-xXx--xX-Xx--xXx-"
+                  ; "-----------------"
+                  ; "-----xx---xx-----"
+                  ; "-----X-----X-----"
+                  ; "-----x-----x-----"
+                  ]
+                ; [ "-----------------"
+                  ; "----xX-----Xx----"
+                  ; "-----XX---XX-----"
+                  ; "--x--x-x-x-x--x--"
+                  ; "--XXx-XX-XX-xXX--"
+                  ; "---X-X-X-X-X-X---"
+                  ; "----xXX---XXx----"
+                  ; "-----------------"
+                  ; "----xXX---XXx----"
+                  ; "---X-X-X-X-X-X---"
+                  ; "--XXx-XX-XX-xXX--"
+                  ; "--x--x-x-x-x--x--"
+                  ; "-----XX---XX-----"
+                  ; "----xX-----Xx----"
+                  ; "-----------------"
+                  ]
+                ]
+              )
+            ]
+
+
+        let toTestCases (name, turns) =
+            let period = List.length turns
+
+            let testName turn =
+                let from = turn + 1
+                let into = (from % period) + 1
+                sprintf "The '%s' keeps oscillating with period %d at evolution %d -> %d" name period from into
+
+            let stepCase turn source =
+                let next = turns.[(turn + 1) % period]
+                testCase (testName turn) <| fun _ ->
+                    Universe.evolve source
+                        |> Expect.equal "evolved" next
+
+            List.mapi stepCase turns
+
+
+        Seq.collect toTestCases cases
+            |> List.ofSeq
+            |> testList "Game of Life's Known: Oscillators"

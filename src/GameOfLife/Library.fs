@@ -21,16 +21,17 @@ module Universe =
                 | Infant -> Alive
                 | cell -> cell
 
-            let alive =
+            let alives =
                 neighbours
                     |> Seq.where (fun a -> a <> Dead)
                     |> Seq.length
 
-            match (alive, it) with
-            | (2, Infant) -> Alive
-            | (2, Alive) -> Alive
-            | (3, Dead) -> Infant
-            | (3, Alive) -> Alive
+            match (it, alives) with
+            | (Dead, 3) -> Infant
+            | (Alive, 2) -> Alive
+            | (Alive, 3) -> Alive
+            | (Infant, 2) -> Alive
+            | (Infant, 3) -> Alive
             | _ -> Dead
 
 
